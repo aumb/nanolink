@@ -14,6 +14,24 @@ class App extends StatelessWidget {
         brightness: Brightness.dark,
         colorScheme: const ShadZincColorScheme.dark(),
       ),
+      builder: (_, child) => Scaffold(
+        body: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Container(
+              constraints: const BoxConstraints(maxWidth: 1200),
+              alignment: Alignment.centerRight,
+              padding: const EdgeInsets.all(16),
+              child: const ShadAvatar(
+                'https://github.githubassets.com/assets/GitHub-Mark-ea2971cee799.png',
+              ),
+            ),
+            Expanded(
+              child: child ?? const SizedBox.shrink(),
+            ),
+          ],
+        ),
+      ),
     );
   }
 }
