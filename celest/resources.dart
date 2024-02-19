@@ -7,10 +7,17 @@ library;
 import 'package:celest/celest.dart';
 
 abstract final class apis {
+  static const clicks = CloudApi(name: r'clicks');
+
   static const links = CloudApi(name: r'links');
 }
 
 abstract final class functions {
+  static const clicksGetClicksNumber = CloudFunction(
+    api: r'clicks',
+    functionName: r'getClicksNumber',
+  );
+
   static const linksCreateLink = CloudFunction(
     api: r'links',
     functionName: r'createLink',

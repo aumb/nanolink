@@ -3,55 +3,50 @@ import 'dart:developer';
 import 'package:celest_backend/client.dart';
 import 'package:celest_backend/models.dart';
 import 'package:equatable/equatable.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:nanolink/app/base_status.dart';
 import 'package:nanolink/features/links/services/links_local_data_service.dart';
-import 'package:signals/signals.dart';
 
-class CreateLinkService {
-  CreateLinkService(this._linksLocalDataService);
+class CreateLinkCubit extends Cubit<CreateLinkViewModel> {
+  CreateLinkCubit(this._linksLocalDataService)
+      : super(const CreateLinkViewModel());
 
   final LinksLocalDataService _linksLocalDataService;
 
-  final viewModelSignal = signal(const CreateLinkViewModel());
-
-  CreateLinkViewModel get viewModel => viewModelSignal.value;
-
-  void updateUrl(String value) =>
-      viewModelSignal.value = viewModelSignal.value.copyWith(
-        url: value,
-        status: const InitialStatus(),
+  void updateUrl(String value) => emit(
+        state.copyWith(status: const InitialStatus(), url: value),
       );
 
   Future<void> createLink() async {
-    if (viewModelSignal.value.status.isLoading) return;
+    if (state.status.isLoading) return;
 
-    viewModelSignal.value = viewModelSignal.value.copyWith(
-      status: const LoadingStatus(),
-    );
+    emit(state.copyWith(status: const LoadingStatus()));
 
     try {
       final result = await celest.functions.links.createLink(
-        LinkRequest(originalUrl: viewModelSignal.value.url),
+        LinkRequest(originalUrl: state.url),
       );
       final hasSavedLocally = await _linksLocalDataService.saveLink(result);
 
       if (!hasSavedLocally) {
-        viewModelSignal.value = viewModelSignal.value.copyWith(
-          status: ErrorStatus(
-            'Failed to save a link for ${viewModelSignal.value.url}',
+        emit(
+          state.copyWith(
+            status: ErrorStatus(
+              'Failed to save a link for ${state.url}',
+            ),
           ),
         );
       }
 
-      viewModelSignal.value = viewModelSignal.value.copyWith(
-        status: const LoadedStatus(),
-      );
+      emit(state.copyWith(status: const LoadedStatus()));
     } catch (e) {
       log(e.toString());
 
-      viewModelSignal.value = viewModelSignal.value.copyWith(
-        status: ErrorStatus(
-          'Failed to generate a link for ${viewModelSignal.value.url}',
+      emit(
+        state.copyWith(
+          status: ErrorStatus(
+            'Failed to generate a link for ${state.url}',
+          ),
         ),
       );
     }

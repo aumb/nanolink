@@ -1,41 +1,59 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/scheduler.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:get_it/get_it.dart';
 import 'package:nanolink/app/base_status.dart';
 import 'package:nanolink/app/widgets/toastification.dart';
-import 'package:nanolink/features/links/services/create_link_service.dart';
-import 'package:nanolink/features/links/services/links_local_data_service.dart';
+import 'package:nanolink/features/links/create_link/create_link_cubit.dart';
+import 'package:nanolink/features/links/links_cubit.dart';
 import 'package:nanolink/features/links/widgets/link_card.dart';
 import 'package:shadcn_ui/shadcn_ui.dart';
-import 'package:signals/signals_flutter.dart';
 
 class LinksPage extends StatelessWidget {
   const LinksPage({super.key});
 
   @override
   Widget build(BuildContext context) {
-    final createLinkService = GetIt.I<CreateLinkService>()
-      ..viewModelSignal.watch(context);
+    return MultiBlocProvider(
+      providers: [
+        BlocProvider(
+          create: (_) => GetIt.I<LinksCubit>()..fetchLinks(),
+        ),
+        BlocProvider(
+          create: (context) => GetIt.I<CreateLinkCubit>(),
+        ),
+      ],
+      child: BlocListener<CreateLinkCubit, CreateLinkViewModel>(
+        listener: (context, state) {
+          final status = state.status;
 
-    SchedulerBinding.instance.addPostFrameCallback(
-      (_) {
-        final status = createLinkService.viewModel.status;
-
-        switch (status) {
-          case LoadedStatus<CreateLinkViewModel>():
-            showSuccessToast(
-              context,
-              'Created a new link for ${createLinkService.viewModel.url}',
-            );
-          case ErrorStatus<CreateLinkViewModel>(error: final e):
-            showErrorToast(context, e);
-          case InitialStatus<CreateLinkViewModel>():
-          case LoadingStatus<CreateLinkViewModel>():
-          case EmptyStatus<CreateLinkViewModel>():
-            break;
-        }
-      },
+          switch (status) {
+            case LoadedStatus<CreateLinkViewModel>():
+              showSuccessToast(
+                context,
+                'Created a new link for ${state.url}',
+              );
+              context.read<LinksCubit>().fetchLinks();
+            case ErrorStatus<CreateLinkViewModel>(error: final e):
+              showErrorToast(context, e);
+            case InitialStatus<CreateLinkViewModel>():
+            case LoadingStatus<CreateLinkViewModel>():
+            case EmptyStatus<CreateLinkViewModel>():
+              break;
+          }
+        },
+        child: const LinksView(),
+      ),
     );
+  }
+}
+
+class LinksView extends StatelessWidget {
+  const LinksView({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    final links = context.select((LinksCubit c) => c.state.links);
+    final createLinkState = context.select((CreateLinkCubit c) => c.state);
 
     return Scaffold(
       body: Center(
@@ -58,12 +76,13 @@ class LinksPage extends StatelessWidget {
                     Expanded(
                       child: ShadInput(
                         placeholder: const Text('Enter a link to shorten it'),
-                        onChanged: createLinkService.updateUrl,
-                        onSubmitted: (_) => createLinkService.createLink(),
+                        onChanged: context.read<CreateLinkCubit>().updateUrl,
+                        onSubmitted: (_) =>
+                            context.read<CreateLinkCubit>().createLink(),
                       ),
                     ),
                     ShadButton.outline(
-                      icon: createLinkService.viewModel.status.isLoading
+                      icon: createLinkState.status.isLoading
                           ? const SizedBox.square(
                               dimension: 16,
                               child: CircularProgressIndicator(
@@ -72,7 +91,7 @@ class LinksPage extends StatelessWidget {
                             )
                           : const Icon(Icons.chevron_right),
                       size: ShadButtonSize.icon,
-                      onPressed: createLinkService.createLink,
+                      onPressed: context.read<CreateLinkCubit>().createLink,
                     ),
                   ],
                 ),
@@ -80,10 +99,7 @@ class LinksPage extends StatelessWidget {
                 Wrap(
                   runSpacing: 8,
                   spacing: 16,
-                  children: GetIt.I<LinksLocalDataService>()
-                      .savedLinks
-                      .map((e) => LinkCard(link: e))
-                      .toList(),
+                  children: links.map((e) => LinkCard(link: e)).toList(),
                 ),
               ],
             ),
