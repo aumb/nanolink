@@ -11,14 +11,14 @@ class LinksLocalDataService {
   final SharedPreferences _sharedPreferences;
 
   List<String> get encodedLinks =>
-      (_sharedPreferences.getStringList(_linksKey) ?? []).reversed.toList();
+      _sharedPreferences.getStringList(_linksKey) ?? [];
 
   List<Link> get savedLinks => encodedLinks
       .map((e) => Link.fromJson(jsonDecode(e) as Map<String, dynamic>))
       .toList();
 
   Future<bool> saveLink(Link link) {
-    final links = encodedLinks..add(jsonEncode(link.toJson()));
+    final links = encodedLinks..insert(0, jsonEncode(link.toJson()));
 
     return _sharedPreferences.setStringList(_linksKey, links);
   }

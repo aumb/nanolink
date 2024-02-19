@@ -13,6 +13,11 @@ abstract final class apis {
 }
 
 abstract final class functions {
+  static const clicksAddClick = CloudFunction(
+    api: r'clicks',
+    functionName: r'addClick',
+  );
+
   static const clicksGetClicksNumber = CloudFunction(
     api: r'clicks',
     functionName: r'getClicksNumber',
@@ -31,6 +36,11 @@ abstract final class functions {
   static const linksGetLink = CloudFunction(
     api: r'links',
     functionName: r'getLink',
+  );
+
+  static const linksGetLinks = CloudFunction(
+    api: r'links',
+    functionName: r'getLinks',
   );
 }
 

@@ -9,8 +9,15 @@ class LinksCubit extends Cubit<LinksViewModel> {
 
   final LinksLocalDataService _linksLocalDataService;
 
-  void fetchLinks() {
-    emit(state.copyWith(links: _linksLocalDataService.savedLinks));
+  Future<void> fetchLinks() async {
+    emit(state.copyWith(status: const LoadingStatus()));
+    await Future<dynamic>.delayed(const Duration(milliseconds: 200));
+    emit(
+      state.copyWith(
+        links: _linksLocalDataService.savedLinks,
+        status: const LoadedStatus(),
+      ),
+    );
   }
 }
 

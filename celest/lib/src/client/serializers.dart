@@ -1,8 +1,35 @@
 // ignore_for_file: type=lint, unused_local_variable, unnecessary_cast, unnecessary_import
 
 import 'package:celest/celest.dart';
+import 'package:celest_backend/src/clicks/models.dart';
 import 'package:celest_backend/src/links/exceptions.dart';
 import 'package:celest_backend/src/links/models.dart';
+
+final class ClickSerializer extends Serializer<Click> {
+  const ClickSerializer();
+
+  @override
+  Click deserialize(Object? value) {
+    final serialized = assertWireType<Map<String, dynamic>>(value);
+    return Click.fromJson(serialized);
+  }
+
+  @override
+  Map<String, dynamic> serialize(Click value) => value.toJson();
+}
+
+final class ClickRequestSerializer extends Serializer<ClickRequest> {
+  const ClickRequestSerializer();
+
+  @override
+  ClickRequest deserialize(Object? value) {
+    final serialized = assertWireType<Map<String, dynamic>>(value);
+    return ClickRequest.fromJson(serialized);
+  }
+
+  @override
+  Map<String, dynamic> serialize(ClickRequest value) => value.toJson();
+}
 
 final class LinkSerializer extends Serializer<Link> {
   const LinkSerializer();

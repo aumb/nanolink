@@ -25,6 +25,8 @@ class Celest {
   final functions = CelestFunctions();
 
   void init() {
+    Serializers.instance.put(const ClickSerializer());
+    Serializers.instance.put(const ClickRequestSerializer());
     Serializers.instance.put(const LinkSerializer());
     Serializers.instance.put(const LinkRequestSerializer());
     Serializers.instance.put(const InvalidLinkDataExceptionSerializer());

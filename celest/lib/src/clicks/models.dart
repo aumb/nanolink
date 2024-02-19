@@ -32,7 +32,7 @@ class ClickRequest extends Equatable {
     required this.linkId,
   });
 
-  final String linkId;
+  final int linkId;
 
   factory ClickRequest.fromJson(Map<String, dynamic> json) => ClickRequest(
         linkId: json['link_id'],

@@ -7,6 +7,7 @@ library;
 import 'dart:convert';
 
 import 'package:celest/celest.dart';
+import 'package:celest_backend/src/clicks/models.dart';
 import 'package:celest_backend/src/links/exceptions.dart';
 import 'package:celest_backend/src/links/models.dart';
 import 'package:celest_core/src/exception/cloud_exception.dart';
@@ -48,12 +49,44 @@ class CelestFunctionsClicks {
         }
     }
   }
+
+  Future<Click> addClick(ClickRequest clickRequest) async {
+    final $response = await celest.httpClient.post(
+      celest.baseUri.resolve('/clicks/add-click'),
+      headers: const {'Content-Type': 'application/json; charset=utf-8'},
+      body: jsonEncode({
+        r'clickRequest':
+            Serializers.instance.serialize<ClickRequest>(clickRequest)
+      }),
+    );
+    final $body = (jsonDecode($response.body) as Map<String, Object?>);
+    if ($response.statusCode == 200) {
+      return Serializers.instance.deserialize<Click>($body['response']);
+    }
+    final $error = ($body['error'] as Map<String, Object?>);
+    final $code = ($error['code'] as String);
+    final $details = ($error['details'] as Map<String, Object?>?);
+    switch ($code) {
+      case r'BadRequestException':
+        throw Serializers.instance.deserialize<BadRequestException>($details);
+      case r'InternalServerException':
+        throw Serializers.instance
+            .deserialize<InternalServerException>($details);
+      case _:
+        switch ($response.statusCode) {
+          case 400:
+            throw BadRequestException($code);
+          case _:
+            throw InternalServerException($code);
+        }
+    }
+  }
 }
 
 class CelestFunctionsLinks {
-  Future<List<Link>> getLink() async {
+  Future<List<Link>> getLinks() async {
     final $response = await celest.httpClient.post(
-      celest.baseUri.resolve('/links/get-link'),
+      celest.baseUri.resolve('/links/get-links'),
       headers: const {'Content-Type': 'application/json; charset=utf-8'},
     );
     final $body = (jsonDecode($response.body) as Map<String, Object?>);
@@ -61,6 +94,35 @@ class CelestFunctionsLinks {
       return ($body['response'] as Iterable<Object?>)
           .map((el) => Serializers.instance.deserialize<Link>(el))
           .toList();
+    }
+    final $error = ($body['error'] as Map<String, Object?>);
+    final $code = ($error['code'] as String);
+    final $details = ($error['details'] as Map<String, Object?>?);
+    switch ($code) {
+      case r'BadRequestException':
+        throw Serializers.instance.deserialize<BadRequestException>($details);
+      case r'InternalServerException':
+        throw Serializers.instance
+            .deserialize<InternalServerException>($details);
+      case _:
+        switch ($response.statusCode) {
+          case 400:
+            throw BadRequestException($code);
+          case _:
+            throw InternalServerException($code);
+        }
+    }
+  }
+
+  Future<Link?> getLink(String id) async {
+    final $response = await celest.httpClient.post(
+      celest.baseUri.resolve('/links/get-link'),
+      headers: const {'Content-Type': 'application/json; charset=utf-8'},
+      body: jsonEncode({r'id': id}),
+    );
+    final $body = (jsonDecode($response.body) as Map<String, Object?>);
+    if ($response.statusCode == 200) {
+      return Serializers.instance.deserialize<Link?>($body['response']);
     }
     final $error = ($body['error'] as Map<String, Object?>);
     final $code = ($error['code'] as String);

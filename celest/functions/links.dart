@@ -6,7 +6,7 @@ import '../resources.dart';
 
 const _linksTableName = 'links';
 
-Future<List<Link>> getLink(
+Future<List<Link>> getLinks(
   @env.supabaseUrl String supabaseUrl,
   @env.supabaseKey String supabaseKey,
 ) async {
@@ -14,6 +14,19 @@ Future<List<Link>> getLink(
       await db(supabaseUrl, supabaseKey).from(_linksTableName).select();
 
   return result.map((e) => Link.fromJson(e)).toList();
+}
+
+Future<Link?> getLink(
+  String id,
+  @env.supabaseUrl String supabaseUrl,
+  @env.supabaseKey String supabaseKey,
+) async {
+  final result = await db(supabaseUrl, supabaseKey)
+      .from(_linksTableName)
+      .select()
+      .eq('shortened_url', id);
+
+  return result.isNotEmpty ? Link.fromJson(result.first) : null;
 }
 
 Future<Link> createLink(
