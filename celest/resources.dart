@@ -7,12 +7,28 @@ library;
 import 'package:celest/celest.dart';
 
 abstract final class apis {
-  static const greeting = CloudApi(name: r'greeting');
+  static const links = CloudApi(name: r'links');
 }
 
 abstract final class functions {
-  static const greetingSayHello = CloudFunction(
-    api: r'greeting',
-    functionName: r'sayHello',
+  static const linksCreateLink = CloudFunction(
+    api: r'links',
+    functionName: r'createLink',
   );
+
+  static const linksDeleteLink = CloudFunction(
+    api: r'links',
+    functionName: r'deleteLink',
+  );
+
+  static const linksGetLink = CloudFunction(
+    api: r'links',
+    functionName: r'getLink',
+  );
+}
+
+abstract final class env {
+  static const supabaseUrl = EnvironmentVariable(name: r'supabaseUrl');
+
+  static const supabaseKey = EnvironmentVariable(name: r'supabaseKey');
 }

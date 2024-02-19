@@ -9,6 +9,9 @@ dependencies:
   celest: ^0.1.0
   celest_core: ^0.1.0
   http: ">=0.13.0 <2.0.0"
+  supabase: ^2.0.7
+  shortid: ^0.1.2
+  equatable: ^2.0.5
 
 dev_dependencies:
   lints: ^3.0.0
